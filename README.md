@@ -94,8 +94,7 @@ While testing tools like Scikit-Learn (`model_methods.py`) are present for bench
 ├── app.py                  # Main Streamlit application & Scratch ML classes
 ├── model_methods.py        # Helper benchmarking functions using Scikit-Learn tools
 ├── heart_data.txt          # The Cleveland clinic dataset used for training
-├── dataset.txt             # Dataset origin notes and source URLs
-└── README.md               # Project documentation
+└── dataset.txt             # Dataset origin notes and source URLs
 ```
 
 ---
