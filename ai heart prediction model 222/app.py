@@ -640,10 +640,14 @@ MODEL_MAP = {
     "K-Nearest Neighbors":  "knn",
 }
 
+import os
+
+DATASET_PATH = os.path.join(os.path.dirname(__file__), 'heart_data.txt')
+
 # ── Load & train (cached) ─────────────────────────────────────
 with st.spinner(f"Training {model_label} model from scratch..."):
     model, scale_mu, scale_sigma, metrics, df = load_and_train(
-        'heart_data.txt', MODEL_MAP[model_label]
+        DATASET_PATH, MODEL_MAP[model_label]
     )
 
 # ── Page Title ────────────────────────────────────────────────
