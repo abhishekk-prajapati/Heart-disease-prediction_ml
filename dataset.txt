@@ -1,0 +1,14 @@
+The Dataset: Cleveland Clinic Heart Disease
+For this task, we'll use the well-known Heart Disease UCI dataset, specifically the processed Cleveland Clinic dataset. It's a staple in the machine learning community for classification tasks. This dataset contains 14 attributes (like age, sex, chest pain type, etc.) and a target variable indicating the presence or absence of heart disease.
+
+Why this dataset?
+
+Clean and Ready: It's already been cleaned and pre-processed, making it easy to plug directly into a model.
+
+Well-Understood: It has been extensively studied, so the expected model performance is well-documented.
+
+Accessible: It's readily available online.
+
+Heart Disease UCI - Processed Cleveland Data
+https://www.google.com/url?sa=E&source=gmail&q=https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data
+
