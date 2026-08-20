@@ -726,7 +726,7 @@ with col_input:
         "Major Vessels": ca, "Thalassemia": thal,
     }
     input_display = pd.DataFrame(
-        input_labels.items(), columns=["Feature", "Value"]
+        [(k, str(v)) for k, v in input_labels.items()], columns=["Feature", "Value"]
     ).set_index("Feature")
     st.dataframe(input_display, use_container_width=True)
 
