@@ -101,8 +101,8 @@ While testing tools like Scikit-Learn (`model_methods.py`) are present for bench
 
 ## 👤 Author 
 
-**[Your Name]** 
+**[Abhishek Prajapati]** 
 * Data Science Enthusiast | Machine Learning Engineer
-* [LinkedIn](https://linkedin.com/in/yourprofile) | [Portfolio](https://yourwebsite.com) | [Email](mailto:youremail@example.com)
+* [LinkedIn](https://www.linkedin.com/in/abhishek-prajapati-243823223/) | [Portfolio](https://abhishekk-prajapati-portfolio.surge.sh/) | [Email](akprajapati71004@gmail.com)
 
 If you found this project helpful or interesting, please consider giving it a ⭐!
