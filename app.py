@@ -651,43 +651,46 @@ with st.spinner(f"Training {model_label} model from scratch..."):
     )
 
 # ── Page Title ────────────────────────────────────────────────
-st.title("❤️ Heart Disease Predictor")
+st.title("❤️ Heart Health Assistant")
 st.markdown(
-    f"Currently using **{model_label}** — implemented **entirely from scratch** "
-    "with NumPy (no sklearn model classes). Dataset: Cleveland Heart Disease (303 patients)."
+    "Welcome to your personal heart health assistant. Enter your details on the left, "
+    "and our AI will provide an educational estimate of your heart health, along with simple "
+    "lifestyle tips you can start today."
 )
-
-# ── Algorithm Info Badge ──────────────────────────────────────
-algo_desc = {
-    "Logistic Regression":  "Gradient Descent · Sigmoid activation · Binary Cross-Entropy loss · α=0.1 · 1000 iterations",
-    "K-Nearest Neighbors":  "Euclidean Distance · K=7 neighbours · Majority Vote · Lazy Learner (no training phase)",
-    "Random Forest":        "25 Decision Trees · Bootstrap Sampling (Bagging) · Feature Bagging (√n features/split) · Entropy Criterion",
-}
-st.info(f"🔬 **Algorithm details:** {algo_desc[model_label]}", icon="ℹ️")
 
 # ─────────────────────────────────────────────────────────────
 # SIDEBAR — Patient input controls
 # ─────────────────────────────────────────────────────────────
 st.sidebar.markdown("---")
-st.sidebar.header("🏥 Patient Medical Details")
+st.sidebar.header("🏥 Your Health Profile")
 
-age      = st.sidebar.slider("Age (years)",              29,  77,  54)
-sex      = st.sidebar.radio("Sex",                       ("Male", "Female"))
-cp       = st.sidebar.selectbox("Chest Pain Type",       (1, 2, 3, 4),
-                                help="1=Typical Angina, 2=Atypical Angina, 3=Non-anginal, 4=Asymptomatic")
-trestbps = st.sidebar.slider("Resting BP (mm Hg)",       94, 200, 132)
-chol     = st.sidebar.slider("Cholesterol (mg/dl)",     126, 564, 246)
-fbs      = st.sidebar.radio("Fasting Blood Sugar >120 mg/dl", ("No", "Yes"))
-restecg  = st.sidebar.selectbox("Resting ECG",           (0, 1, 2),
-                                 help="0=Normal, 1=ST-T wave abnormality, 2=LV hypertrophy")
-thalach  = st.sidebar.slider("Max Heart Rate Achieved",  71, 202, 150)
-exang    = st.sidebar.radio("Exercise-Induced Angina",   ("No", "Yes"))
-oldpeak  = st.sidebar.slider("ST Depression (Oldpeak)",  0.0, 6.2, 1.0, step=0.1)
-slope    = st.sidebar.selectbox("ST Slope",              (1, 2, 3),
-                                help="1=Upsloping, 2=Flat, 3=Downsloping")
-ca       = st.sidebar.selectbox("Major Vessels (CA)",    (0, 1, 2, 3))
-thal     = st.sidebar.selectbox("Thalassemia (Thal)",    (3, 6, 7),
+age      = st.sidebar.slider("1. Age", 29, 77, 54)
+sex      = st.sidebar.radio("2. Biological Sex", ("Male", "Female"))
+cp       = st.sidebar.selectbox("3. Chest Pain Type", (1, 2, 3, 4),
+                                help="1=Typical Angina, 2=Atypical Angina, 3=Non-anginal, 4=No symptoms")
+trestbps = st.sidebar.slider("4. Resting Blood Pressure (mmHg)", 94, 200, 132,
+                             help="Usually the top number (systolic) on your BP reading.")
+chol     = st.sidebar.slider("5. Serum Cholesterol (mg/dl)", 126, 564, 246,
+                             help="Check your lipid profile lab report for 'Total Cholesterol'.")
+fbs      = st.sidebar.radio("6. Fasting Blood Sugar > 120 mg/dl?", ("No", "Yes"),
+                            help="Check your diabetes or glucose lab test.")
+restecg  = st.sidebar.selectbox("7. Resting ECG Result", (0, 1, 2),
+                                 help="0=Normal, 1=Abnormal ST-T wave, 2=Left ventricular hypertrophy. (Found on ECG report)")
+thalach  = st.sidebar.slider("8. Maximum Heart Rate (bpm)", 71, 202, 150,
+                             help="Highest heart rate achieved during a stress test or heavy exercise.")
+exang    = st.sidebar.radio("9. Chest Pain During Exercise?", ("No", "Yes"))
+oldpeak  = st.sidebar.slider("10. ST Depression (Oldpeak)", 0.0, 6.2, 1.0, step=0.1,
+                             help="A technical value from an exercise ECG test.")
+slope    = st.sidebar.selectbox("11. ST Segment Slope", (1, 2, 3),
+                                help="Found on your exercise ECG report. 1=Upsloping, 2=Flat, 3=Downsloping")
+ca       = st.sidebar.selectbox("12. Major Vessels Colored (Fluoroscopy)", (0, 1, 2, 3),
+                                help="Number of vessels lit up during a fluoroscopy scan (0-3).")
+thal     = st.sidebar.selectbox("13. Thalassemia Blood Test", (3, 6, 7),
                                 help="3=Normal, 6=Fixed Defect, 7=Reversible Defect")
+
+with st.sidebar.expander("🤔 Don't know some of these numbers?"):
+    st.write("Most of these numbers can be found on a **standard blood test (lipid panel)** and a **stress test (ECG)** report from your doctor.")
+    st.write("If you don't have them right now, leave them at the default values, which represent an average adult.")
 
 # Build raw input vector
 raw_input = np.array([[
@@ -710,9 +713,9 @@ raw_input = np.array([[
 input_scaled = (raw_input - scale_mu) / (scale_sigma + 1e-8)
 
 # ─────────────────────────────────────────────────────────────
-# MAIN LAYOUT — Three columns
+# MAIN LAYOUT — Two columns
 # ─────────────────────────────────────────────────────────────
-col_input, col_pred, col_metrics = st.columns([1.1, 1.5, 1.2])
+col_input, col_pred = st.columns([1.2, 2.0])
 
 # ── Column 1: Patient input table ─────────────────────────────
 with col_input:
@@ -732,45 +735,126 @@ with col_input:
 
 # ── Column 2: Prediction ──────────────────────────────────────
 with col_pred:
-    st.subheader("🔮 Prediction")
+    st.subheader("🔮 Your Heart Health Estimate")
 
     if model is not None:
-        if st.button("🫀 Run Prediction", type="primary", use_container_width=True):
-            prediction = model.predict(input_scaled)
-            proba      = model.predict_proba(input_scaled)[0]   # [P(0), P(1)]
+        tab_estimate, tab_what_if = st.tabs(["🩺 Current Estimate", "⚡ What-If Simulator"])
+        
+        with tab_estimate:
+            if st.button("🫀 Calculate My Estimate", type="primary", use_container_width=True):
+                prediction = model.predict(input_scaled)
+                proba      = model.predict_proba(input_scaled)[0]   # [P(0), P(1)]
+                risk_percent = proba[1] * 100
 
-            if prediction[0] == 1:
-                st.error("## 💔 HIGH Risk of Heart Disease")
-                st.markdown(
-                    f"The model estimates a **{proba[1]*100:.1f}%** probability "
-                    "of heart disease being present."
+                # Friendly 4-Tier Gauge logic
+                if risk_percent < 30:
+                    st.success("## 🟢 Optimal / Low Risk")
+                    st.write("Your current profile looks great! Keep up the healthy habits.")
+                elif risk_percent < 50:
+                    st.warning("## 🟡 Mild / Watchful")
+                    st.write("Your profile is relatively healthy, but there is room for optimization. Small lifestyle tweaks can make a big difference.")
+                elif risk_percent < 75:
+                    st.warning("## 🟠 Elevated Risk")
+                    st.write("Your profile shows some elevated risk factors. It's a great time to start taking proactive steps with your diet and exercise.")
+                else:
+                    st.error("## 🔴 High Priority")
+                    st.write("Your profile indicates a higher probability of heart-related issues. Don't panic—this is an educational estimate, but we strongly recommend discussing these results with a healthcare professional.")
+                
+                st.progress(int(risk_percent) / 100)
+                st.markdown(f"**Calculated Score:** {risk_percent:.1f}%")
+
+                # Actionable tips
+                st.markdown("---")
+                st.subheader("💡 3 Things You Can Do Today")
+                tips = []
+                if chol > 200:
+                    tips.append("- 🥗 **Diet:** Your cholesterol is a bit high. Try adding soluble fiber like oats and beans, and reduce fried foods.")
+                if trestbps > 130:
+                    tips.append("- 🏃 **Exercise:** Your blood pressure is elevated. Just 30 minutes of brisk walking a day can help lower it naturally.")
+                if fbs == "Yes":
+                    tips.append("- 📉 **Blood Sugar:** Since your fasting blood sugar is elevated, try reducing added sugars and refined carbs.")
+                if thalach < 120 and age < 65:
+                    tips.append("- 🫀 **Cardio:** Your max heart rate is on the lower side. Gradually adding aerobic exercises (like cycling) can strengthen your heart.")
+                if len(tips) < 3:
+                    tips.append("- 💤 **Sleep & Stress:** Aim for 7-8 hours of quality sleep. Stress and poor sleep directly impact your heart health.")
+                if len(tips) < 3:
+                    tips.append("- 💧 **Hydration:** Drink plenty of water throughout the day to help your heart pump blood more easily.")
+                
+                for tip in tips[:3]:
+                    st.markdown(tip)
+                
+                # Doctor checklist
+                st.markdown("---")
+                st.subheader("👨‍⚕️ Bring this to your Doctor")
+                st.info(
+                    "Feeling unsure? Next time you visit your clinic, show them your inputs from the left panel and ask these questions:\n\n"
+                    "- What should my target blood pressure and cholesterol be for my age?\n"
+                    "- Do I need a follow-up lipid panel or ECG test?\n"
+                    "- Are there specific exercises I should avoid or prioritize?"
                 )
+                
+        with tab_what_if:
+            st.markdown("### Test Lifestyle Changes")
+            st.write("Adjust the sliders below to see how improving your health metrics could lower your risk.")
+            
+            sim_trestbps = st.slider("Target Blood Pressure", 90, 200, int(trestbps), key="sim_bp")
+            sim_chol = st.slider("Target Cholesterol", 100, 500, int(chol), key="sim_chol")
+            sim_thalach = st.slider("Target Max Heart Rate (Cardio Fitness)", 70, 202, int(thalach), key="sim_hr")
+            
+            # Build simulated input
+            sim_input = np.array([[
+                age,
+                1 if sex == "Male" else 0,
+                cp,
+                sim_trestbps,
+                sim_chol,
+                1 if fbs == "Yes" else 0,
+                restecg,
+                sim_thalach,
+                1 if exang == "Yes" else 0,
+                oldpeak,
+                slope,
+                ca,
+                thal
+            ]], dtype=float)
+            
+            sim_input_scaled = (sim_input - scale_mu) / (scale_sigma + 1e-8)
+            sim_proba = model.predict_proba(sim_input_scaled)[0]
+            sim_risk_percent = sim_proba[1] * 100
+            
+            st.markdown("---")
+            st.markdown(f"### New Projected Risk: **{sim_risk_percent:.1f}%**")
+            
+            # Compare with original risk (if calculated)
+            orig_proba = model.predict_proba(input_scaled)[0]
+            orig_risk_percent = orig_proba[1] * 100
+            diff = orig_risk_percent - sim_risk_percent
+            
+            if diff > 0.5:
+                st.success(f"🎉 By making these changes, you could **reduce your risk by {diff:.1f}%**!")
+            elif diff < -0.5:
+                st.warning(f"⚠️ These changes would **increase your risk by {abs(diff):.1f}%**.")
             else:
-                st.success("## ❤️ LOW Risk of Heart Disease")
-                st.markdown(
-                    f"The model estimates a **{proba[0]*100:.1f}%** probability "
-                    "of the patient being healthy."
-                )
-
-            # Probability table
-            st.markdown("**Class Probabilities:**")
-            prob_df = pd.DataFrame({
-                "Class":       ["No Heart Disease (0)", "Heart Disease (1)"],
-                "Probability": [f"{proba[0]*100:.2f}%",  f"{proba[1]*100:.2f}%"]
-            })
-            st.table(prob_df)
+                st.info("These specific changes don't significantly impact the model's estimate.")
+                
     else:
         st.error("❌ Model could not be loaded. Check the dataset path.")
 
-# ── Column 3: Model Performance ───────────────────────────────
-with col_metrics:
+# ── Developer / Technical Data ───────────────────────────────
+st.markdown("---")
+with st.expander("🛠️ For Developers: Model Performance Metrics"):
     st.subheader("📊 Model Performance")
     st.caption("Evaluated on 20% hold-out test set")
 
     if metrics:
         cm      = metrics.pop("_cm")
-        for metric_name, val in metrics.items():
-            st.metric(label=metric_name, value=f"{val}%")
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            for metric_name, val in list(metrics.items())[:2]:
+                st.metric(label=metric_name, value=f"{val}%")
+        with col_m2:
+            for metric_name, val in list(metrics.items())[2:]:
+                st.metric(label=metric_name, value=f"{val}%")
         metrics["_cm"] = cm   # restore
 
         # Confusion matrix display
