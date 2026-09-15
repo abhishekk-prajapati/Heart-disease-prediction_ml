@@ -752,49 +752,65 @@ with col_pred:
                     st.write("Your current profile looks great! Keep up the healthy habits.")
                 elif risk_percent < 50:
                     st.warning("## 🟡 Mild / Watchful")
-                    st.write("Your profile is relatively healthy, but there is room for optimization. Small lifestyle tweaks can make a big difference.")
+                    st.write("Your profile is relatively healthy, but there is room for optimization.")
                 elif risk_percent < 75:
                     st.warning("## 🟠 Elevated Risk")
-                    st.write("Your profile shows some elevated risk factors. It's a great time to start taking proactive steps with your diet and exercise.")
+                    st.write("Your profile shows some elevated risk factors. It's a great time to start taking proactive steps.")
                 else:
                     st.error("## 🔴 High Priority")
-                    st.write("Your profile indicates a higher probability of heart-related issues. Don't panic—this is an educational estimate, but we strongly recommend discussing these results with a healthcare professional.")
+                    st.write("Your profile indicates a higher probability of heart-related issues. Please consult a healthcare professional.")
                 
+                # --- PREMIUM UI: Dashboard Metric ---
+                col_score, col_empty = st.columns([1, 1])
+                with col_score:
+                    st.metric(label="Calculated Risk Score", value=f"{risk_percent:.1f}%")
                 st.progress(int(risk_percent) / 100)
-                st.markdown(f"**Calculated Score:** {risk_percent:.1f}%")
 
-                # Actionable tips
+                # --- PREMIUM UI: Categorized Action Plan ---
                 st.markdown("---")
-                st.subheader("💡 3 Things You Can Do Today")
-                tips = []
-                if chol > 200:
-                    tips.append("- 🥗 **Diet:** Your cholesterol is a bit high. Try adding soluble fiber like oats and beans, and reduce fried foods.")
-                if trestbps > 130:
-                    tips.append("- 🏃 **Exercise:** Your blood pressure is elevated. Just 30 minutes of brisk walking a day can help lower it naturally.")
-                if fbs == "Yes":
-                    tips.append("- 📉 **Blood Sugar:** Since your fasting blood sugar is elevated, try reducing added sugars and refined carbs.")
-                if thalach < 120 and age < 65:
-                    tips.append("- 🫀 **Cardio:** Your max heart rate is on the lower side. Gradually adding aerobic exercises (like cycling) can strengthen your heart.")
-                if len(tips) < 3:
-                    tips.append("- 💤 **Sleep & Stress:** Aim for 7-8 hours of quality sleep. Stress and poor sleep directly impact your heart health.")
-                if len(tips) < 3:
-                    tips.append("- 💧 **Hydration:** Drink plenty of water throughout the day to help your heart pump blood more easily.")
+                st.subheader("💡 Your Personalized Action Plan")
                 
-                for tip in tips[:3]:
-                    st.markdown(tip)
+                # Nutrition
+                st.markdown("#### 🍎 Nutrition & Diet")
+                if chol > 200 and trestbps > 130:
+                    st.info("**Try the DASH Diet:** Since both your cholesterol and blood pressure are elevated, the DASH (Dietary Approaches to Stop Hypertension) diet is highly recommended. Focus on vegetables, fruits, and low-fat dairy.")
+                elif chol > 200:
+                    st.info("**Lower Cholesterol:** Try adding soluble fiber like oats and beans, and reduce saturated fats.")
+                elif fbs == "Yes":
+                    st.warning("**Manage Blood Sugar:** Limit refined carbs and sugary drinks to help manage your fasting blood sugar.")
+                else:
+                    st.success("Keep eating a balanced diet with plenty of whole foods!")
+
+                # Movement
+                st.markdown("#### 🏃 Lifestyle & Movement")
+                if exang == "Yes":
+                    st.error("**Exercise Caution:** Since you experience chest pain during exercise, **consult your doctor** before starting any new aerobic regimen.")
+                elif thalach < 120 and age < 65:
+                    st.info("**Build Cardio Fitness:** Your max heart rate is on the lower side. Gradually introduce Zone 2 cardio (like brisk walking or light cycling) to strengthen your heart.")
+                elif trestbps > 130:
+                    st.info("**Daily Movement:** Just 30 minutes of walking a day can naturally help lower your blood pressure.")
+                else:
+                    st.success("Maintain an active lifestyle! Aim for 150 minutes of moderate activity per week.")
+
+                # Medical
+                st.markdown("#### 🩺 Medical Next Steps")
+                if fbs == "Yes":
+                    st.warning("**Ask your doctor for an HbA1c test** to get a 3-month average of your blood sugar.")
+                if chol > 240:
+                    st.warning("**Ask your doctor for a detailed Lipid Panel** to check your LDL vs HDL ratio.")
                 
                 # Doctor checklist
                 st.markdown("---")
                 st.subheader("👨‍⚕️ Bring this to your Doctor")
                 st.info(
-                    "Feeling unsure? Next time you visit your clinic, show them your inputs from the left panel and ask these questions:\n\n"
+                    "Show them your inputs from the left panel and ask:\n\n"
                     "- What should my target blood pressure and cholesterol be for my age?\n"
                     "- Do I need a follow-up lipid panel or ECG test?\n"
                     "- Are there specific exercises I should avoid or prioritize?"
                 )
                 
         with tab_what_if:
-            st.markdown("### Test Lifestyle Changes")
+            st.markdown("### ⚡ Test Lifestyle Changes")
             st.write("Adjust the sliders below to see how improving your health metrics could lower your risk.")
             
             sim_trestbps = st.slider("Target Blood Pressure", 90, 200, int(trestbps), key="sim_bp")
@@ -822,13 +838,17 @@ with col_pred:
             sim_proba = model.predict_proba(sim_input_scaled)[0]
             sim_risk_percent = sim_proba[1] * 100
             
-            st.markdown("---")
-            st.markdown(f"### New Projected Risk: **{sim_risk_percent:.1f}%**")
-            
-            # Compare with original risk (if calculated)
             orig_proba = model.predict_proba(input_scaled)[0]
             orig_risk_percent = orig_proba[1] * 100
             diff = orig_risk_percent - sim_risk_percent
+            
+            st.markdown("---")
+            
+            # PREMIUM UI: What-If Delta Metric
+            col_sim1, col_sim2 = st.columns([1, 1])
+            with col_sim1:
+                delta_str = f"{-diff:.1f}%" if diff != 0 else None
+                st.metric(label="New Projected Risk", value=f"{sim_risk_percent:.1f}%", delta=delta_str, delta_color="inverse")
             
             if diff > 0.5:
                 st.success(f"🎉 By making these changes, you could **reduce your risk by {diff:.1f}%**!")
